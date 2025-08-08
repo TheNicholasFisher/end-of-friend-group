@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>THE END</title>
+<style>
+  html,body{
+    height:100%;
+    margin:0;
+    background:#000;
+    color:rgb(255, 0, 0);
+    font-family: monospace;
+    overflow:hidden;
+  }
+  .center{
+    position:fixed;
+    top:50%;left:50%;
+    transform:translate(-50%,-50%);
+    text-align:center;
+    z-index:2;
+  }
+  h1{
+    font-size:4vw;
+    margin-bottom:1rem;
+    text-shadow:0 0 10px rgb(255, 0, 0);
+  }
+  .time{
+    font-size:8vw;
+    text-shadow:0 0 15px rgb(255, 0, 0);
+  }
+  #staticCanvas{
+    position:fixed;
+    inset:0;
+    z-index:1;
+    mix-blend-mode:screen;
+    opacity:0.35;
+    pointer-events:none;
+  }
+  #flashImg {
+    position: fixed;
+    max-width: 300px;
+    z-index: 999;
+    pointer-events: none;
+    display: none;
+  }
+  #flashImg {
+  position: fixed;
+  max-width: 300px;
+  z-index: 999;
+  pointer-events: none;
+  display: none;
+  opacity: 0.2;              /* Slight transparency */
+  transition: opacity 0.5s ease-out; /* Smooth fade */
+}
+#flashImg.hidden {
+  opacity: 0;                /* Fully transparent when hidden */
+}
+</style>
+</head>
+<body>
+<canvas id="staticCanvas"></canvas>
+<img id="flashImg" src="https://i.imgur.com/5KM5VO6.png" alt="flash image">
+<div class="center">
+  <h1>END OF FRIEND GROUP</h1>
+  <div class="time" id="countdown">--:--:--:--:---</div>
+</div>
+
+<script>
+/* Countdown with milliseconds */
+(function(){
+  const countdownEl = document.getElementById('countdown');
+  function targetTime(){
+    const now = new Date();
+    let year = now.getFullYear();
+    let target = new Date(`${year}-08-10T00:00:00-04:00`); // EDT
+    if (target <= now) target = new Date(`${year+1}-08-10T00:00:00-04:00`);
+    return target.getTime();
+  }
+  const target = targetTime();
+  function update(){
+    let diff = Math.max(0, target - Date.now());
+    let days = Math.floor(diff / (1000*60*60*24));
+    let hours = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+    let mins = Math.floor((diff % (1000*60*60)) / (1000*60));
+    let secs = Math.floor((diff % (1000*60)) / 1000);
+    let ms = diff % 1000;
+    countdownEl.textContent =
+      String(days).padStart(2,'0')+":"+
+      String(hours).padStart(2,'0')+":"+
+      String(mins).padStart(2,'0')+":"+
+      String(secs).padStart(2,'0')+":"+
+      String(ms).padStart(3,'0');
+    requestAnimationFrame(update);
+  }
+  update();
+})();
+
+function flashImage(){
+  const iw = img.naturalWidth || 300;
+  const ih = img.naturalHeight || 300;
+  const scale = Math.min(1, 300 / Math.max(iw, ih));
+  const displayW = iw * scale;
+  const displayH = ih * scale;
+  const x = Math.random() * (window.innerWidth - displayW);
+  const y = Math.random() * (window.innerHeight - displayH);
+
+  img.style.left = x + 'px';
+  img.style.top = y + 'px';
+
+  img.classList.remove('hidden');
+  img.style.display = 'block';
+
+  // Trigger fade-out after a short delay
+  setTimeout(() => img.classList.add('hidden'), 100);
+
+  // Hide completely after transition
+  setTimeout(() => img.style.display = 'none', 300);
+
+  setTimeout(flashImage, Math.random() * 10000);
+}
+
+/* Flashing Image at random positions and intervals */
+(function(){
+  const img = document.getElementById('flashImg');
+  function flashImage(){
+    const iw = img.naturalWidth || 300;
+    const ih = img.naturalHeight || 300;
+    const scale = Math.min(1, 300 / Math.max(iw, ih));
+    const displayW = iw * scale;
+    const displayH = ih * scale;
+    const x = Math.random() * (window.innerWidth - displayW);
+    const y = Math.random() * (window.innerHeight - displayH);
+    img.style.left = x + 'px';
+    img.style.top = y + 'px';
+    img.style.display = 'block';
+    setTimeout(() => img.style.display = 'none', 300);
+    setTimeout(flashImage, Math.random() * 10000);
+  }
+  if (img.complete) {
+    flashImage();
+  } else {
+    img.onload = flashImage;
+  }
+})();
+
+/* Static Effect */
+(function(){
+  const canvas = document.getElementById('staticCanvas');
+  const ctx = canvas.getContext('2d');
+  let w,h;
+  function resize(){
+    w = canvas.width = innerWidth;
+    h = canvas.height = innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+  function draw(){
+    const imgData = ctx.createImageData(w,h);
+    const buf = new Uint32Array(imgData.data.buffer);
+    for(let i=0;i<buf.length;i++){
+      const shade = Math.random()*255|0;
+      buf[i] = (255<<24)|(shade<<16)|(shade<<8)|shade;
+    }
+    ctx.putImageData(imgData,0,0);
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* Eerie Sound Auto */
+(function(){
+  let ctx = new (window.AudioContext||window.webkitAudioContext)();
+  let master = ctx.createGain();
+  master.gain.value = 0.18;
+  master.connect(ctx.destination);
+  function osc(freq,type,gainVal){
+    let o = ctx.createOscillator();
+    o.type = type;
+    o.frequency.value = freq;
+    let g = ctx.createGain();
+    g.gain.value = gainVal;
+    o.connect(g).connect(master);
+    o.start();
+    return o;
+  }
+  osc(40,'sine',0.6);
+  osc(55,'sawtooth',0.2);
+  osc(110,'triangle',0.15);
+  const bufferSize = 2 * ctx.sampleRate;
+  const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+  const output = noiseBuffer.getChannelData(0);
+  for (let i=0; i<bufferSize; i++){
+    output[i] = (Math.random()*2-1)*0.3;
+  }
+  const noise = ctx.createBufferSource();
+  noise.buffer = noiseBuffer;
+  noise.loop = true;
+  let noiseGain = ctx.createGain();
+  noiseGain.gain.value = 0.02;
+  noise.connect(noiseGain).connect(master);
+  noise.start();
+  if (ctx.state === 'suspended') {
+    const resume = ()=>{ctx.resume();document.removeEventListener('click',resume);};
+    document.addEventListener('click',resume);
+  }
+})();
+</script>
+</body>
+</html>
