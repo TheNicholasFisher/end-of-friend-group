@@ -73,7 +73,7 @@
   function targetTime(){
     const now = new Date();
     let year = now.getFullYear();
-    let target = new Date(`${year}-012-31T00:00:00-04:00`); // EDT
+    let target = new Date(`${year}-12-31T00:00:00-04:00`); // EDT
     if (target <= now) target = new Date(`${year+1}-08-10T00:00:00-04:00`);
     return target.getTime();
   }
